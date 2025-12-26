@@ -173,6 +173,229 @@ Nginx = better performance
 SSH forwarding = secure
 
 Compatible with CI/CD pipelines
+--
+
+🧠 Good to Know — Docker Build, BuildKit & Secrets
+
+This section explains core Docker build concepts that are important to understand, independent of this project.
+
+🏗️ Docker Build vs Docker Buildx
+Traditional Docker build (legacy)
+
+Command:
+
+docker build
+
+
+Characteristics:
+
+Limited build features
+
+No secure secret handling
+
+No SSH forwarding
+
+Every command creates a permanent image layer
+
+Secrets can accidentally be stored in image history
+
+This build mode is not suitable for secure builds involving private repositories or credentials.
+
+Modern Docker build (Buildx + BuildKit)
+
+Command:
+
+docker buildx build
+
+
+Characteristics:
+
+Uses BuildKit (modern build engine)
+
+Supports advanced features:
+
+--mount=type=ssh
+
+--mount=type=secret
+
+Better caching
+
+Parallel execution
+
+Designed for secure, production-grade builds
+
+🔑 BuildKit — What It Really Is
+
+BuildKit is Docker’s modern build engine.
+
+Key idea:
+
+BuildKit can give the build temporary access to sensitive resources WITHOUT saving them into the image.
+
+This is the foundation of secure Docker builds.
+
+BuildKit enables:
+
+Temporary access to SSH authentication
+
+Temporary access to secrets
+
+Zero persistence of sensitive data
+
+Clean final images
+
+🔐 What Is an SSH Agent?
+
+An SSH agent is a background process that:
+
+Holds private SSH keys in memory
+
+Performs cryptographic signing on your behalf
+
+Never exposes the private key itself
+
+Important points:
+
+The private key never leaves the host machine
+
+Other tools communicate with the agent via a Unix socket
+
+The agent answers authentication challenges without sharing the key
+
+This is why SSH agent forwarding is secure.
+
+🔗 --mount=type=ssh
+
+--mount=type=ssh allows a Docker build step to:
+
+Access the host’s SSH agent
+
+Authenticate to private Git repositories
+
+Clone code securely during build
+
+Key properties:
+
+No SSH key is copied into the image
+
+SSH access exists only during that RUN command
+
+After the step finishes, access disappears completely
+
+This is authentication forwarding, not secret copying.
+
+🔐 What Is --mount=type=secret (Simple Definition)
+
+--mount=type=secret allows you to securely pass sensitive data
+(tokens, passwords, API keys) to a Docker build step without storing them in the image.
+
+Key idea:
+
+The secret is available only during that RUN step
+
+It is never written to the image
+
+It does not appear in:
+
+Image layers
+
+Docker history
+
+Final image
+
+⚠️ This feature is BuildKit-only.
+
+⚙️ How --mount=type=secret Works Internally
+
+Think of it as:
+
+A temporary in-memory file that exists only while the command runs.
+
+What actually happens:
+
+You pass a secret at build time
+
+BuildKit mounts it as a temporary file
+(usually under /run/secrets/)
+
+The command reads the secret
+
+The command finishes
+
+The secret file disappears forever
+
+The image layer contains NO trace of the secret
+
+Security guarantees:
+
+🔐 No filesystem copy
+
+🔐 No environment variable leakage
+
+🔐 No Docker history exposure
+
+⚠️ Why ARG and ENV Are Insecure for Secrets
+
+Using ARG or ENV to handle secrets during a Docker build is not secure.
+
+ARG (Build Arguments)
+
+Values passed via ARG can appear in:
+
+Image metadata
+
+docker history
+
+Even if not visible in the final filesystem, secrets may still be recoverable from image layers
+
+Build logs in CI systems can accidentally expose them
+
+👉 ARG is suitable only for non-sensitive build configuration.
+
+ENV (Environment Variables)
+
+ENV values are:
+
+Stored permanently in the image
+
+Visible via docker inspect
+
+Inherited by all containers created from the image
+
+Anyone with access to the image can read the secret
+
+👉 ENV should never be used for build-time secrets.
+
+🔥 Critical Docker Rule
+
+Deleting a secret in a later Docker layer does NOT remove it from earlier layers.
+
+Once a secret exists in a layer, it exists forever in the image history.
+
+🔄 type=ssh vs type=secret (Very Important)
+Feature	type=ssh	type=secret
+Purpose	Git SSH authentication	Tokens, passwords, API keys
+Uses SSH agent	✅ Yes	❌ No
+File-based secret	❌	✅
+Typical use	git clone	npm, pip, API auth
+Secret leaves host	❌ Never	❌ Never
+🧠 Final Mental Model (Remember Forever)
+
+type=ssh → temporary access to authentication
+
+type=secret → temporary access to data
+
+Both:
+
+Exist only during a RUN step
+
+Leave no trace in the final image
+
+Require BuildKit
+
+Docker images should always be treated as public artifacts.
+
+--
 
 📄 License
 
