@@ -6,15 +6,18 @@ RUN apk add --no-cache git openssh-client
 # create the work directory 
 WORKDIR /app
 
-RUN mkdir -p -0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+RUN mkdir -p ~/.ssh \
+ && chmod 700 ~/.ssh \
+ && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 
 # Clone private repository using SSH forwarding (SECURE)
 # The SSH key is NEVER stored in the image
 
-RUN --mount=type=ssh git clone git@github.com:hazem324/e-commerce-temp.git .
+RUN --mount=type=ssh git clone git@github.com:hazem324/light-bootstrap-dashboard-react-master.git .
 
 # Install dependencies and build React app
-RUN npm install && npm run build
+RUN npm install --legacy-peer-deps && npm run build
 
 FROM nginx:alpine
 
@@ -24,4 +27,3 @@ COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
-
