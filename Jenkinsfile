@@ -24,11 +24,11 @@ pipeline {
         stage('Build image'){
             steps{
                 sshagent(credentials:['github-ssh-key']){
-                    ''' 
+                    sh ''' 
                     echo 'build docker image '
                     docker buildx build \
                     --ssh default \
-                    
+
                     '''
                 }
             }
