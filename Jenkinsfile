@@ -5,18 +5,21 @@ pipeline {
             steps{
                checkout scm
             }
-        } stage('Verify Environment'){
+        }
+        stage('Verify Environment'){
+            steps{
             sh'''
             echo "checking docker installed ...."
             docker --version 
-            
+
             echo "checking docker diamen ...."
             docker info > /dev/null
 
             echo "checking docker buildx ...."
             docker buildx version
             
-            '''
+            ''' 
+            }
         }
     }
 }
