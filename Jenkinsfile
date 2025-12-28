@@ -28,7 +28,7 @@ pipeline {
                     echo 'build docker image '
                     docker buildx build \
                     --ssh default \
-
+                    .
                     '''
                 }
             }
