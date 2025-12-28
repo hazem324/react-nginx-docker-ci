@@ -9,16 +9,28 @@ pipeline {
         stage('Verify Environment'){
             steps{
             sh'''
-            echo "checking docker installed ...."
+             echo "=== Checking Docker CLI ==="
             docker --version 
 
-            echo "checking docker diamen ...."
+            echo "=== Checking Docker daemon ==="
             docker info > /dev/null
 
-            echo "checking docker buildx ...."
+            echo "=== Checking Docker Buildx ==="
             docker buildx version
             
             ''' 
+            }
+        } 
+        stage('Build image'){
+            steps{
+                sshagent(credentials:['github-ssh-key']){
+                    ''' 
+                    echo 'build docker image '
+                    docker buildx build \
+                    --ssh default \
+                    
+                    '''
+                }
             }
         }
     }
