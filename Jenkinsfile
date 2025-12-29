@@ -36,12 +36,10 @@ pipeline {
         } 
         stage('validate image'){
             steps {
-                steps {
-                    sh '''
-                    echo "validating docker image
-                    docker image inspect react-nginx:ci > /dev/null
-                    '''
-                }
+                sh '''
+                echo "validating docker image
+                docker image inspect react-nginx:ci > /dev/null
+                '''
             }
         }
         stage('Run container test'){
