@@ -75,10 +75,10 @@ pipeline {
                         echo "$PASSWORD" | docker login -u "$USERNAME" --password-stdin
 
                         echo "=== Tagging image ==="
-                        docker tag react-nginx:ci hazem231/react-nginx:latest
+                        docker tag react-nginx:ci $USERNAME/react-nginx:latest
 
                         echo "=== Pushing image to Docker Hub ==="
-                        docker push hazem231/react-nginx:latest
+                        docker push $USERNAME/react-nginx:latest
                     '''
                 }
             }
