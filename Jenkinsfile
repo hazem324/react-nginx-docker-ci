@@ -78,7 +78,7 @@ pipeline {
                         docker tag react-nginx:ci hazem231/react-nginx:latest
 
                         echo "=== Pushing image to Docker Hub ==="
-                        docker push $USERNAME/react-nginx:latest
+                        docker push hazem231/react-nginx:latest
                     '''
                 }
             }
