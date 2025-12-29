@@ -51,7 +51,7 @@ pipeline {
             steps {
                 sh '''
                     echo "=== Running container for test ==="
-                    docker run -d -p 8080:80 --name react-front react-nginx:ci
+                    docker run -d -p 8083:80 --name react-front react-nginx:ci
 
                     echo "=== Waiting for container to start ==="
                     sleep 5
