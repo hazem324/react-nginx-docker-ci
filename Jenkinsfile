@@ -84,15 +84,15 @@ pipeline {
              
             }
         } 
-        post {
+    }
+            post {
             always {    
                 sh '''
-                   echo "🧹 Cleaning up..."
+                   echo " Cleaning up..."
 
                   docker rm -f myapp_test || true
                   docker rmi myapp:ci || true
                 '''
             }
         }
-    }
 }       
