@@ -90,8 +90,8 @@ pipeline {
                 sh '''
                    echo " Cleaning up..."
 
-                  docker rm -f myapp_test || true
-                  docker rmi myapp:ci || true
+                  docker rm -f react-front || true
+                  docker rmi react-nginx:ci || true
                 '''
             }
         }
